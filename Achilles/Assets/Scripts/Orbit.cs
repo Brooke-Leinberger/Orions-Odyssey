@@ -5,6 +5,40 @@ using UnityEngine;
 
 /// <summary>
 /// 2D Orbit class for 2 body systems. Moves counter-clockwise.
+/// 
+/// Reference guide: Section numbers [§x.x.x(.x)] can used to see exact definitions, 
+/// and applications in the provided external documentation
+/// -first digit reference page, 
+/// -second digit references section, 
+/// -third digit refrerences either subsection or item number,
+/// -if there is a fourth digit, it refers to item number.
+/// 
+/// (order of documentation subject to change; this is the order as of 9/9/2021)
+/// quick reference:
+/// 
+/// Geometric Files:
+/// (1)  Preface and Axioms
+/// (2)  Principles Derivation
+/// (3)  Eccentricity Derivation //May change in placement
+/// (4)  Radius Derivation
+/// (5)  Area Derivation
+/// 
+/// The Following Geometics Files are tentative/in progress:
+/// (6)  Parbolic and Hyperbolic Geometry
+/// (7)  True anomaly from Area Derivation
+/// (8)  Geometric Index
+/// 
+/// The Following Physics Files are tentative/in progress
+/// Physics Files:
+/// (9)  Physics Derivation
+/// (10) Orbital functions as a function of time derivation
+/// (11) Astronaut Derivation of Properties
+/// (12) Changes in orbital characteristics
+/// (13) Patched Conics Derivation and Application
+/// (14) Physics Index
+/// (15) Programming Index //almost all functions in this fill will reference this
+/// (16) Complete Index
+/// 
 /// Author: Brooke Leinberger
 /// Date created: September 4th, 2021
 /// </summary>
@@ -15,7 +49,7 @@ public class Orbit : MonoBehaviour
     private int polarity = 1;
     /*
     The shape of an orbit can be defined by the relationship between 
-        *Semi Major Axis and Semi Minor Axis (a and b)
+        *Semi Major Axis and Semi Minor Axis (§1.2.4 and b)
         *Semi Major Axis and eccentricity (a and e)(The one we use)
         
     The physics of an orbit can be defined by the the standard gravitational parameter (mu, in documentation)  
@@ -53,7 +87,6 @@ public class Orbit : MonoBehaviour
     #endregion
 
     #region Constructor Initializers
-    //Every constructor eventually references Init
 
     private void PrincipleInit()
     {
@@ -80,6 +113,7 @@ public class Orbit : MonoBehaviour
         areaAnomalyPlot = table.ToArray();
     }
 
+    //Every constructor eventually references Init
     /// <summary>
     /// Initializes the standard orbit object using the most basic identites.
     /// All other initializing functions are based off this one.
@@ -162,12 +196,23 @@ public class Orbit : MonoBehaviour
     #region Static Constructor functions
     private static float Square(float val) => val * val; //dont trust the pow function to be effecient enough
     private static float Cube(float val) => val * Square(val);
-    private static float Mod(float val, float r) => (val % r + r) % r;
+    private static float Mod(float val, float r) => (val % r + r) % r; //get true Modulo function
 
 
     //Phyisics Functions:
     #region Vis Viva Functions
-    public static float VelocityVisViva(float semiMajorAxis, float mu, float radius) => Mathf.Sqrt(mu * ((2 / radius) - 1 / (semiMajorAxis)));
+    //The following functions with "VisViva" in the name are all rearanged formulations of the Vis-Viva formula
+    /// <summary>
+    /// Used to derive Speed (no direction information directly included) from various observational information
+    /// </summary>
+    /// <param name="semiMajorAxis">; §1.2.4</param>
+    /// <param name="mu"></param>
+    /// <param name="radius"></param>
+    /// <returns></returns>
+    public static float VelocityVisViva(float semiMajorAxis, float mu, float radius)
+    {
+        return Mathf.Sqrt(mu * ((2 / radius) - 1 / (semiMajorAxis)));
+    }
     /// <summary>
     /// Uses a rearranged Vis-Viva Formula to get semi major axis from velocity, distance, and planetary mass
     /// </summary>
@@ -175,7 +220,10 @@ public class Orbit : MonoBehaviour
     /// <param name="mu">The standard gravitation parameter of the orbital focus</param>
     /// <param name="radius">The orbital radius</param>
     /// <returns></returns>
-    public static float MajorVisViva(float velocity, float mu, float radius) => 1/((2 / radius) - (Square(velocity) / mu));
+    public static float MajorVisViva(float velocity, float mu, float radius)
+    {
+        return 1 / ((2 / radius) - (Square(velocity) / mu));
+    }
     public static float MuVisViva(float semiMajorAxis, float velocity, float radius) => Square(velocity) / ((2 / radius - 1) / semiMajorAxis);
     public static float MuOrbitalPeriod(float semiMajorAxis, float orbitalPeriod) => 4 * Square(Mathf.PI) * Cube(semiMajorAxis) / Square(orbitalPeriod);
     #endregion
@@ -266,8 +314,7 @@ public class Orbit : MonoBehaviour
     /// <returns></returns>
     public float UnitArea(float eccentricAnomaly)
     {
-        float area = (eccentricAnomaly - eccentricity * Mathf.Sin(eccentricAnomaly));
-        //if (eccentricAnomaly > Mathf.PI) area += fullArea();
+        float area = eccentricAnomaly - eccentricity * Mathf.Sin(eccentricAnomaly);
         return area;
     }
     public float ScaledArea(float eccentricAnomaly) => 0.5f * semiMajorAxis * semiMinorAxis * UnitArea(eccentricAnomaly);
