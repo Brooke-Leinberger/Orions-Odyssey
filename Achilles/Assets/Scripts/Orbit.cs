@@ -5,57 +5,60 @@ using UnityEngine;
 
 /// <summary>
 /// 2D Orbit class for 2 body systems. Moves counter-clockwise.
-/// 
-/// Reference guide: Section numbers [§x.x.x(.x)] can used to see exact definitions, 
-/// and applications in the provided external documentation
-/// -first digit reference page, 
-/// -second digit references section, 
-/// -third digit refrerences either subsection or item number,
-/// -if there is a fourth digit, it refers to item number.
-/// 
-/// (order of documentation subject to change; this is the order as of 9/9/2021)
-/// quick reference:
-/// 
-/// Geometric Files:
-/// (1)  Preface and Axioms
-/// (2)  Principles Derivation
-/// (3)  Eccentricity Derivation //May change in placement
-/// (4)  Radius Derivation
-/// (5)  Area Derivation
-/// 
-/// The Following Geometics Files are tentative/in progress:
-/// (6)  Parbolic and Hyperbolic Geometry
-/// (7)  True anomaly from Area Derivation
-/// (8)  Geometric Index
-/// 
-/// The Following Physics Files are tentative/in progress
-/// Physics Files:
-/// (9)  Physics Derivation
-/// (10) Orbital functions as a function of time derivation
-/// (11) Astronaut Derivation of Properties
-/// (12) Changes in orbital characteristics
-/// (13) Patched Conics Derivation and Application
-/// (14) Physics Index
-/// (15) Programming Index //almost all functions in this fill will reference this
-/// (16) Complete Index
-/// 
-/// Author: Brooke Leinberger
-/// Date created: September 4th, 2021
 /// </summary>
+ 
+ /*
+ Reference guide: Section numbers [§x.x.x(.x)] can used to see exact definitions, 
+ and applications in the provided external documentation
+ -first digit reference page, 
+ -second digit references section, 
+ -third digit refrerences either subsection or item number,
+ -if there is a fourth digit, it refers to item number.
+ 
+ (order of documentation subject to change; this is the order as of 9/9/2021)
+ quick reference:
+ 
+ Geometric Files:
+ (1)  Preface and Axioms
+ (2)  Principles Derivation
+ (3)  Eccentricity Derivation //May change in placement
+ (4)  Radius Derivation
+ (5)  Area Derivation
+ 
+ The Following Geometics Files are tentative/in progress:
+ (6)  Parbolic and Hyperbolic Geometry
+ (7)  True anomaly from Area Derivation
+ (8)  Geometric Index
+ 
+ The Following Physics Files are tentative/in progress
+ Physics Files:
+ (9)  Physics Derivation
+ (10) Orbital functions as a function of time derivation
+ (11) Astronaut Derivation of Properties
+ (12) Changes in orbital characteristics
+ (13) Patched Conics Derivation and Application
+ (14) Physics Index
+ (15) Programming Index //almost all functions in this fill will reference this
+ (16) Complete Index
+ 
+ Author: Brooke Leinberger
+ Date created: September 4th, 2021
+ */
 public class Orbit : MonoBehaviour
 {
     #region Properties
     public const float GRAV_CONST = 6.6743e-11f; //physics
     private int polarity = 1;
-    /*
-    The shape of an orbit can be defined by the relationship between 
-        *Semi Major Axis and Semi Minor Axis (§1.2.4 and b)
-        *Semi Major Axis and eccentricity (a and e)(The one we use)
-        
-    The physics of an orbit can be defined by the the standard gravitational parameter (mu, in documentation)  
-
-    Therefore, a satellites orbit can be described by three numbers, and methods can be defined to find geometric and physics
-    values for specific points in the orbit (E.G.: Orbital radius, speed, direction, velocity-vector, etc)
+    /* 
+     * There are many ways to construct an orbit, the documentation can show many many ways to convert values to
+     * to useful parameters that can reconstruct the geometry and/or the physics of an orbit.
+     * 
+     * For this class, we will have our base constructor use :
+     * - Semi Major Axis and Eccentricity for geometry (§1.2.4 & §1.2.7, respectively)
+     * - Standard Gravitation Parameter for Physics (§[WIP])
+     * 
+     * Constructors accepting other parameters will first convert those parameters to the parameters above before 
+     * reconstructing the orbit.
      */
 
     //Negative one is used as a default value for most properties since it should be impossible to naturally get.
