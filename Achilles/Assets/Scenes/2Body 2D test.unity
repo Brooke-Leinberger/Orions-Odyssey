@@ -461,10 +461,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1277ffd8d1e85db4dadaef935d7a6b86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SemiMajorAxis: 5
-  Eccentricity: 0
+  SemiMajorAxis: 10
+  Eccentricity: 0.8
   Mass: 0
-  OrbitalPeriod: 4
+  OrbitalPeriod: 3
   trueAnomaly: 0
   earth: {fileID: 0}
   useOrbitalPeriod: 1

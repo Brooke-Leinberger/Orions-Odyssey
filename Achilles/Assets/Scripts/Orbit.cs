@@ -69,7 +69,7 @@ public class Orbit : MonoBehaviour
         orbitalPeriod = 2 * Mathf.PI * Mathf.Sqrt(Cube(semiMajorAxis) / standardGrav); //time it takes to complete 1 revolution
         constantOfArea = Mathf.Sqrt(semiLatusRectum * standardGrav) / 2; //area swept out by satellite from orbital focus per second
         scaleOfArea = semiMajorAxis * semiMinorAxis / 2; //The scale between a given area and its corresponding unit area
-        dTheta = Mathf.Deg2Rad * (1f / 3600f); //lookup table resolution is 1 arcsecond
+        dTheta = Mathf.Deg2Rad * (1f / 60f); //lookup table resolution is 1 arcsecond
         LookUpTableInit();
     }
     private void LookUpTableInit()
@@ -281,7 +281,7 @@ public class Orbit : MonoBehaviour
         float area1 = ScaledArea(TrueToEccentric(theta1));
         float area2 = Mod(area1 + deltaArea, fullArea());
         //any two areas in the lookup table can't be farther away than the area change at apoapsis after (maxFrameRate ^ -1) seconds\
-        float[][] points = areaAnomalyPlot.Where(c => Mathf.Abs(c[0] - area2) < dAreaPlot).ToArray();
+        float[][] points = areaAnomalyPlot.Where(c => Mathf.Abs(c[0] - area2) < dAreaPlot * 2).ToArray();
 
         float smallestDifference = 2 * dAreaPlot;
         int index = 0;
