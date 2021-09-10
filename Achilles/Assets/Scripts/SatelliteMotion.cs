@@ -34,6 +34,8 @@ public class SatelliteMotion : MonoBehaviour
         camera.y = Camera.main.transform.position.y;
         Camera.main.transform.position = camera;
 
+        for (int i = 0; i < 361; i++) Debug.Log(i +" : "+ earth.TrueToEccentric(i * Mathf.Deg2Rad) * Mathf.Rad2Deg);
+
     }
 
     // Update is called once per frame

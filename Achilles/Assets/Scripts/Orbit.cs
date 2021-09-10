@@ -245,8 +245,6 @@ public class Orbit : MonoBehaviour
     /// <param name="radius">The distance from the orbital focus; OrbitalRadius.</param>
     /// <returns>The angle the satellite has swept around the orbital focus from the periapsis, in radians.</returns>
     public float TrueAnomaly(float radius) => Mathf.Acos((semiLatusRectum - radius)/(radius * eccentricity));
-
-
     /// <summary>
     /// </summary>
     /// <param name="radius">The distance from the orbital focus; OrbitalRadius.</param>
