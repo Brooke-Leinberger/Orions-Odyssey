@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
-public class OrbitPhysics : MonoBehaviour
+public class OrbitPhysics : OrbitGeometry
 {
     public const float GRAV_CONST = 6.6743e-11f; //physics
-    private float standardGrav = -1;
-    private OrbitGeometry geo;
+    private float
+        standardGrav = -1,
+        orbitalPeriod = -1,
+        constantOfArea = -1
+        ;
  
     #region Math Helpers
     private static float Square(float val) => val * val; //dont trust the pow function to be effecient enough
@@ -14,21 +18,10 @@ public class OrbitPhysics : MonoBehaviour
     private static float Mod(float val, float r) => (val % r + r) % r; //get true Modulo function
     #endregion
 
-    private OrbitPhysics() { }
 
-    public OrbitPhysics(OrbitGeometry geo, float standardGrav) => this.standardGrav = standardGrav;
-
-    public static OrbitPhysics StandardGravitationalParameter(OrbitGeometry geo, float standardGrav) => new OrbitPhysics(geo, standardGrav);
-
-    public static OrbitPhysics CelestialMass(OrbitGeometry geo, float mass) => new OrbitPhysics(geo, mass * GRAV_CONST);
-
-    public static OrbitPhysics OrbitalPeriod(OrbitGeometry geo, float orbitalPeriod)
+    public OrbitPhysics(float semiMajorAxis, float eccentricity, float standardGrav) : base(semiMajorAxis, eccentricity)
     {
-        //T=2pi*sqrt(a^3/u)
-        //T^2 = 4*pi^2*a^3*u^-1
-        //1 = u^-1 * 4*pi^2*a^3*T^-2
-        //u = 4*pi^2*a^3*T^-2
-        return new OrbitPhysics(geo, 4 * Square(Mathf.PI) * Cube(geo.SemiMajorAxis()) / Square(orbitalPeriod));
+        this.standardGrav = standardGrav;
     }
 
     /// <summary>
@@ -38,8 +31,48 @@ public class OrbitPhysics : MonoBehaviour
     /// <returns></returns>
     public float VelocityFromRadius(float orbitalRadius)
     {
-        return Mathf.Sqrt(standardGrav * (2/orbitalRadius - 1/geo.SemiMajorAxis()));
+        return Mathf.Sqrt(standardGrav * ( (2 / orbitalRadius) - (1 / semiMajorAxis) ) );
     }
 
 
+    private static OrbitPhysics EmptyInit(OrbitGeometry geo)
+    {
+        return (OrbitPhysics)geo;
+    }
+
+    public OrbitPhysics StandardInit(float standardGrav)
+    {
+        //Area as Time (5)
+        this.standardGrav = standardGrav;
+        orbitalPeriod = 2 * Mathf.PI * Mathf.Sqrt(Cube(semiMajorAxis) / standardGrav); //time it takes to complete 1 revolution
+        constantOfArea = Mathf.Sqrt(semiLatusRectum * standardGrav) / 2; //area swept out by satellite from orbital focus per second
+        return this;
+    }
+
+    public OrbitPhysics MassInit(float celestialMass)
+    {
+        return StandardInit(celestialMass * GRAV_CONST);
+    }
+
+    public OrbitPhysics PeriodInit(float orbitalPeriod)
+    {
+        //T=2pi*sqrt(a^3/u)
+        //T^2 = 4*pi^2*a^3*u^-1
+        //1 = u^-1 * 4*pi^2*a^3*T^-2
+        //u = 4*pi^2*a^3*T^-2
+        this.orbitalPeriod = orbitalPeriod;
+        standardGrav = 4 * Square(Mathf.PI) * Cube(semiMajorAxis) / Square(orbitalPeriod);
+        constantOfArea = Mathf.Sqrt(semiLatusRectum * standardGrav) / 2; //area swept out by satellite from orbital focus per second
+        return this;
+    }
+
+    public OrbitPhysics VelocityRadiusInit(float velocity, float orbitalRadius)
+    {
+        standardGrav = Square(velocity) / ((2 / orbitalRadius - 1) / semiMajorAxis);
+        return this;
+    }
+
+    public float StandardGrav() => standardGrav;
+    public float OrbitalPeriod() => orbitalPeriod;
+    public float ConstantOfArea() => constantOfArea;
 }

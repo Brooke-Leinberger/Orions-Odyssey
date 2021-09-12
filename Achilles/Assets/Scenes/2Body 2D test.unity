@@ -311,7 +311,6 @@ GameObject:
   - component: {fileID: 1213988031}
   - component: {fileID: 1213988030}
   - component: {fileID: 1213988029}
-  - component: {fileID: 1213988033}
   m_Layer: 0
   m_Name: Sun
   m_TagString: Untagged
@@ -396,26 +395,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1213988033
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1213988028}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1277ffd8d1e85db4dadaef935d7a6b86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SemiMajorAxis: 5
-  Eccentricity: 0
-  Mass: 0
-  OrbitalPeriod: 4
-  trueAnomaly: 0
-  earth: {fileID: 0}
-  celestialBody: {fileID: 1213988028}
-  useOrbitalPeriod: 1
 --- !u!1 &1645685292
 GameObject:
   m_ObjectHideFlags: 0
@@ -467,7 +446,6 @@ MonoBehaviour:
   Mass: 0
   OrbitalPeriod: 3
   trueAnomaly: 0
-  earth: {fileID: 0}
   celestialBody: {fileID: 1213988028}
   useOrbitalPeriod: 1
 --- !u!135 &1645685295

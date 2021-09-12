@@ -3,11 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class OrbitGeometry : MonoBehaviour
+/// <summary>
+/// Creates Geometry for orbiting bodies. Currently only works with closed orbits
+/// TODO: add support for open orbits (issues with semi major axis being infinite or negative)
+/// </summary>
+
+public class OrbitGeometry
 {
+
     #region Properties
     //-1 is used as a default value for most since almost every one should be non negative
-    private float
+    protected float
 
         //Identities (1)
         semiMajorAxis = -1,      //a
@@ -21,16 +27,14 @@ public class OrbitGeometry : MonoBehaviour
 
         //Area as Time(5)
         fullArea = -1,
-        orbitalPeriod = -1,      //T
-        constantOfArea = -1,     //dA/dt
         scaleOfArea = -1,        //q
-        dTheta = Mathf.Deg2Rad * 1f / 60f //resolution of lookup table
+        dTheta = Mathf.Deg2Rad * 1f / 60f //resolution of lookup table (1 arcminute)
     ;
 
     enum Shape { CIRCLE, ELLIPSE, PARABOLA, HYPERBOLA }
     Shape shape;
 
-    private float[][] AnomalyAreaTable; //used to find the true anomaly, using a value equal to the area swept out by that true anomaly, from periapsis.
+    protected float[][] AnomalyAreaTable; //used to find the true anomaly, using a value equal to the area swept out by that true anomaly, from periapsis.
     private int polarity = -2;  //used when only the magnitude of the y coordinate certain, but polarity is important (may be deprecated) 
     #endregion
 
@@ -90,15 +94,13 @@ public class OrbitGeometry : MonoBehaviour
 
     public float UnitArea(float trueAnomaly)
     {
-        float eccentricAnomaly = Mod(2 * Mathf.Atan(Mathf.Sqrt((1 + eccentricity) / (1 - eccentricity)) * Mathf.Tan(trueAnomaly / 2)), 2 * Mathf.PI);
+        float eccentricAnomaly = Mod(2 * Mathf.Atan(Mathf.Sqrt((1 - eccentricity) / (1 + eccentricity)) * Mathf.Tan(trueAnomaly / 2)), 2 * Mathf.PI);
         return eccentricAnomaly - eccentricity * Mathf.Sin(eccentricAnomaly);
     }
 
     public float LookUpTrueAnomalyTable(float area)
     { 
         area = Mod(area, fullArea);
-        float dAreaPlot = 2 * (fullArea / 2 - Area(Mathf.PI - dTheta / 2));
-        //any two areas in the lookup table can't be farther away than the area change at apoapsis after (maxFrameRate ^ -1) seconds
 
         int indexUpperPot = AnomalyAreaTable.Length - 1, indexLowerPot = 0;
         int indexUpper, indexLower;
@@ -109,6 +111,8 @@ public class OrbitGeometry : MonoBehaviour
         {
             indexUpper = indexUpperPot;
             indexLower = indexLowerPot;
+
+            if (indexUpper - indexLower == 1) break;
 
             int middle = (indexLower + indexUpper) / 2;
             float median = AnomalyAreaTable[middle][0];
@@ -121,28 +125,9 @@ public class OrbitGeometry : MonoBehaviour
         }
         while (inIndex);
 
-
-
-        float smallestDifference = 2 * dAreaPlot;
-        float[][] points = AnomalyAreaTable.Skip(indexLower).Take(indexUpper).ToArray();
-        int index = -1;
-
-        for (int i = 0; i < points.Length; i++)
-        {
-            float difference = Mathf.Abs(points[i][1] - area);
-            if (Mathf.Abs(points[i][1] - area) < smallestDifference)
-            {
-                smallestDifference = difference;
-                index = i;
-            }
-
-        }
-        if (index == -1)
-        {
-            Debug.LogError("Could not find true anomaly corresponding to area: " + area);
-            return -1;
-        }
-        else return AnomalyAreaTable[index][1];
+        List<float[]> list = new List<float[]>();
+        for (int i = indexLower; i < indexUpper + 1; i++) list.Add(AnomalyAreaTable[i]);
+        return list.OrderBy(c => Mathf.Abs(area - c[0])).First()[1];
     }
 
     #region Accessors
@@ -152,8 +137,27 @@ public class OrbitGeometry : MonoBehaviour
     public float SemiLatusRectum() => semiLatusRectum;
     public float Eccentricity() => eccentricity;
     public float LatusScale() => latusScale;
+    public float Area() => fullArea;
     public int Polarity() => polarity;
-    public float ConstantOfArea() => constantOfArea;
-    public float OrbitalPeriod() => orbitalPeriod;
+
+    #endregion
+
+    #region Cartesian Conversions
+    public float OrbitalRadius(float trueAnomaly)
+    {
+        return semiLatusRectum / (eccentricity * Mathf.Cos(trueAnomaly) + 1);
+    }
+    public float TrueAnomaly(float orbitalRadius)
+    {
+        return Mathf.Acos((semiLatusRectum - orbitalRadius)/(eccentricity * orbitalRadius));
+    }
+    public Vector2 CoordinatesAnomaly(float trueAnomaly)
+    {
+        return OrbitalRadius(trueAnomaly) * new Vector2(Mathf.Cos(trueAnomaly), Mathf.Sin(trueAnomaly));
+    }
+    public Vector2 CoordinatesRadius(float orbitalRadius)
+    {
+        return new Vector2(semiLatusRectum - orbitalRadius, Mathf.Sqrt(latusScale * (Square(linearEccentricity) - Square(semiMajorAxis - orbitalRadius)))) / eccentricity;
+    }
     #endregion
 }
