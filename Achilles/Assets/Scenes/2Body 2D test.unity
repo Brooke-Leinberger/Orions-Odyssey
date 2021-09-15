@@ -448,6 +448,8 @@ MonoBehaviour:
   trueAnomaly: 0
   celestialBody: {fileID: 1213988028}
   useOrbitalPeriod: 1
+  fullUpdate: 0
+  isCompleted: 0
 --- !u!135 &1645685295
 SphereCollider:
   m_ObjectHideFlags: 0

@@ -9,7 +9,9 @@ public class OrbitPhysics : OrbitGeometry
     private float
         standardGrav = -1,
         orbitalPeriod = -1,
-        constantOfArea = -1
+        constantOfArea = -1,
+        segmentedDTime = 1,
+        segmentedDTheta = -1
         ;
  
     #region Math Helpers
@@ -19,7 +21,7 @@ public class OrbitPhysics : OrbitGeometry
     #endregion
 
 
-    public OrbitPhysics(float semiMajorAxis, float eccentricity, float standardGrav) : base(semiMajorAxis, eccentricity)
+    public OrbitPhysics(float semiMajorAxis, float eccentricity, float standardGrav, bool generateLookup = true) : base(semiMajorAxis, eccentricity, generateLookup)
     {
         this.standardGrav = standardGrav;
     }
@@ -34,7 +36,6 @@ public class OrbitPhysics : OrbitGeometry
         return Mathf.Sqrt(standardGrav * ( (2 / orbitalRadius) - (1 / semiMajorAxis) ) );
     }
 
-
     private static OrbitPhysics EmptyInit(OrbitGeometry geo)
     {
         return (OrbitPhysics)geo;
@@ -44,7 +45,7 @@ public class OrbitPhysics : OrbitGeometry
     {
         //Area as Time (5)
         this.standardGrav = standardGrav;
-        orbitalPeriod = 2 * Mathf.PI * Mathf.Sqrt(Cube(semiMajorAxis) / standardGrav); //time it takes to complete 1 revolution
+        if(orbitalPeriod == -1) orbitalPeriod = 2 * Mathf.PI * Mathf.Sqrt(Cube(semiMajorAxis) / standardGrav); //time it takes to complete 1 revolution
         constantOfArea = Mathf.Sqrt(semiLatusRectum * standardGrav) / 2; //area swept out by satellite from orbital focus per second
         return this;
     }
@@ -61,8 +62,13 @@ public class OrbitPhysics : OrbitGeometry
         //1 = u^-1 * 4*pi^2*a^3*T^-2
         //u = 4*pi^2*a^3*T^-2
         this.orbitalPeriod = orbitalPeriod;
-        standardGrav = 4 * Square(Mathf.PI) * Cube(semiMajorAxis) / Square(orbitalPeriod);
-        constantOfArea = Mathf.Sqrt(semiLatusRectum * standardGrav) / 2; //area swept out by satellite from orbital focus per second
+        StandardInit(4 * Square(Mathf.PI) * Cube(semiMajorAxis) / Square(orbitalPeriod));
+        return this;
+    }
+
+    public OrbitPhysics SegmentedInit(float seconds)
+    {
+        if (!initComplete) AnomalyAreaTableInit(seconds * constantOfArea);
         return this;
     }
 
@@ -75,4 +81,10 @@ public class OrbitPhysics : OrbitGeometry
     public float StandardGrav() => standardGrav;
     public float OrbitalPeriod() => orbitalPeriod;
     public float ConstantOfArea() => constantOfArea;
+
+    public new OrbitPhysics SetStartAnomaly(float trueAnomaly)
+    {
+        startAnomaly = trueAnomaly;
+        return this;
+    }
 }
